@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sách điện tử — MnKT1</title>
+  <style>
+  
+    :root{
+      --toolbar-bg: #2c3e50;
+      --toolbar-color: #ffffff;
+      --reader-bg: #fff9f0;
+      --reader-color: #111;
+    }
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#f7f1e1, #e8f7fb);height:100vh;display:flex;align-items:center;justify-content:center;padding:10px}
+  .ebook-shell{width:100%;max-width:1180px;height:100%;max-height:100vh;box-shadow:0 8px 40px rgba(0,0,0,.14);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;background:var(--reader-bg)}
+
+  .toolbar{display:flex;gap:1rem;align-items:center;padding:0.9rem 1rem;background:var(--toolbar-bg);color:var(--toolbar-color);flex:0 0 auto}
+    .toolbar .group{display:flex;gap:.5rem;align-items:center}
+  .toolbar button, .toolbar select, .toolbar input[type="color"]{background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--toolbar-color);padding:.55rem .8rem;border-radius:8px;cursor:pointer}
+    .toolbar button:hover, .toolbar select:hover{background:rgba(255,255,255,.04)}
+    .toolbar label{font-size:.86rem;color:rgba(255,255,255,.9);margin-right:.3rem}
+
+  
+    .reader-area{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+
+
+    .toolbar.sticky{position:sticky;top:0;z-index:20}
+
+
+  .content-wrap{flex:1 1 auto;overflow:auto;padding:28px 36px;background:var(--reader-bg);color:var(--reader-color);font-size:16px}
+
+   
+  .content-wrap h1,.content-wrap h2,.content-wrap h3{color:#2b2b2b;margin:1.1rem 0 .6rem}
+    .content-wrap p{margin:.6rem 0;line-height:1.65}
+    .content-wrap img{max-width:100%;height:auto;display:block;margin:.6rem 0}
+    .content-wrap ul, .content-wrap ol{margin:.6rem 0 1rem 1.2rem}
+
+    @media (max-width:900px){
+      .toolbar{flex-wrap:wrap}
+      .toolbar .group{width:100%;justify-content:flex-start}
+    }
+
+
+    .ebook-shell:-webkit-full-screen{width:100%;height:100%;max-width:none;max-height:none}
+    .ebook-shell:-moz-full-screen{width:100%;height:100%;max-width:none;max-height:none}
+    .ebook-shell:fullscreen{width:100%;height:100%;max-width:none;max-height:none}
+
+
+    .muted{color:rgba(255,255,255,.7)}
+  </style>
+</head>
+<body>
+
+<div class="ebook-shell" id="ebookShell">
+  <div class="ebook-inner" style="display:flex;flex:1 1 auto;min-height:0">
+  <aside class="sidebar" id="sidebar" style="width:320px;background:#2c1b10;color:#fff;padding:20px;box-sizing:border-box;flex:0 0 320px;">
+      <div id="sidebarContent">
+  <img id="sidebarCover" src="https://picsum.photos/360/520" alt="Bìa sách" style="width:100%;border-radius:8px;display:block;margin-bottom:14px;">
+        <h4 id="sidebarTitle" style="margin:0 0 .5rem;font-size:18px">Tựa sách</h4>
+        <p id="sidebarAuthor" style="margin:0 0 .25rem;opacity:.9">Tác giả</p>
+        <p id="sidebarPublisher" style="margin:0 0 .8rem;opacity:.8;font-size:13px">Nhà xuất bản</p>
+        <div id="sidebarDesc" style="font-size:13px;line-height:1.35;opacity:.95">Mô tả ngắn...</div>
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,.06);margin:12px 0">
+        <div id="tocContainer" style="font-size:14px;">
+          <strong style="display:block;margin-bottom:.4rem">Mục lục</strong>
+          <nav id="tocList" style="max-height:64vh;overflow:auto;padding-right:8px"></nav>
+        </div>
+      </div>
+    </aside>
+
+    <div class="reader-area" style="flex:1 1 auto;min-height:0;display:flex;flex-direction:column;">
+      <div class="toolbar sticky" role="toolbar" aria-label="Thanh điều khiển sách">
+      <div class="group">
+  <button id="btnDec" title="Giảm cỡ chữ" class="icon-btn" style="background:transparent;border-radius:6px;padding:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="11" width="16" height="2" fill="currentColor"/></svg>
+        </button>
+  <button id="btnInc" title="Tăng cỡ chữ" class="icon-btn" style="background:transparent;border-radius:6px;padding:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="11" y="4" width="2" height="16" fill="currentColor"/><rect x="4" y="11" width="16" height="2" fill="currentColor"/></svg>
+        </button>
+        <label class="muted">Cỡ chữ</label>
+      </div>
+
+      <div class="group">
+        <label for="selFont" class="muted">Font</label>
+        <select id="selFont" aria-label="Chọn font">
+          <option value="Arial, Helvetica, sans-serif">Arial</option>
+          <option value="Times New Roman, Times, serif">Times New Roman</option>
+          <option value="Courier New, Courier, monospace">Courier New</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <label for="selColor" class="muted">Màu chữ</label>
+        <select id="selColor" aria-label="Chọn màu chữ">
+          <option value="#111111">Đen</option>
+          <option value="#2b3a67">Xanh đậm</option>
+          <option value="#3b3b3b">Xám</option>
+          <option value="#5a2a2a">Nâu</option>
+        </select>
+      </div>
+
+      <div class="group" style="margin-left:auto">
+        <button id="btnFullscreen" title="Toàn màn hình" class="icon-btn" style="background:transparent;border-radius:8px;padding:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 9V3h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 3h-6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21H3v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+   
+      <div id="chapterHeader" style="padding:16px 28px;border-bottom:1px solid rgba(0,0,0,.06);background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.4));flex:0 0 auto;position:sticky;top:48px;z-index:15">
+        <div style="display:flex;align-items:baseline;gap:12px;">
+          <h2 id="chapterTitle" style="margin:0;font-size:20px;color:#1f2a2a">Đang tải chương...</h2>
+          <div id="chapterSub" style="color:#666;font-size:13px"></div>
+        </div>
+      </div>
+
+ 
+      <main id="contentWrap" class="content-wrap" tabindex="0" aria-live="polite">
+        <p>Đang tải nội dung sách…</p>
+      </main>
+
+      <div id="navArrows" style="position:fixed;right:28px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:60">
+        <button id="btnPrev" title="Chương trước" class="icon-btn" style="width:56px;height:56px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 15l6-6 6 6" stroke="#2c1b10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button id="btnNext" title="Chương sau" class="icon-btn" style="width:56px;height:56px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 9l-6 6-6-6" stroke="#2c1b10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+const DRAFT_PATH = 'MnKT1.html'; 
+
+const contentWrap = document.getElementById('contentWrap');
+const btnInc = document.getElementById('btnInc');
+const btnDec = document.getElementById('btnDec');
+const selFont = document.getElementById('selFont');
+const selColor = document.getElementById('selColor');
+const btnFullscreen = document.getElementById('btnFullscreen');
+const ebookShell = document.getElementById('ebookShell');
+const btnPrev = document.getElementById('btnPrev');
+const btnNext = document.getElementById('btnNext');
+
+
+let fontSize = 16; 
+let fontFamily = selFont.value;
+let fontColor = selColor.value;
+let headingsList = [];
+let currentHeadingIndex = -1;
+
+function applySettings(){
+  contentWrap.style.fontSize = fontSize + 'px';
+  contentWrap.style.fontFamily = fontFamily;
+  contentWrap.style.color = fontColor;
+}
+
+
+btnInc.addEventListener('click', ()=>{ fontSize = Math.min(40, fontSize + 1); applySettings(); });
+btnDec.addEventListener('click', ()=>{ fontSize = Math.max(10, fontSize - 1); applySettings(); });
+
+
+selFont.addEventListener('change', (e)=>{ fontFamily = e.target.value; applySettings(); });
+selColor.addEventListener('change', (e)=>{ fontColor = e.target.value; applySettings(); });
+
+
+btnFullscreen.addEventListener('click', async ()=>{
+  if (!document.fullscreenElement) {
+    try{
+      await ebookShell.requestFullscreen();
+      btnFullscreen.textContent = '⤡ Thoát';
+    }catch(e){ console.warn('Fullscreen failed', e); }
+  } else {
+    await document.exitFullscreen();
+    btnFullscreen.textContent = '⤢ Fullscreen';
+  }
+});
+
+
+document.addEventListener('fullscreenchange', ()=>{
+  if (!document.fullscreenElement) btnFullscreen.textContent = '⤢ Fullscreen';
+});
+
+
+async function loadDraft(path){
+  try{
+    const res = await fetch(path, {cache: 'no-store'});
+    if (!res.ok) throw new Error('Fetch failed: '+res.status);
+    const text = await res.text();
+
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const body = doc.body || doc;
+
+ 
+    const all = body.querySelectorAll('*');
+    all.forEach(el=>{ if (el.hasAttribute('style')) el.removeAttribute('style'); });
+
+    
+    contentWrap.innerHTML = body.innerHTML || '<p>(Không có nội dung)</p>';
+
+    
+    applySettings();
+
+    contentWrap.querySelectorAll('img').forEach(img=>{
+      const src = img.getAttribute('src') || '';
+      if (src && !/^(https?:)?\/\//i.test(src)){
+        const parts = src.split(/[\\/]+/);
+        const filename = parts[parts.length-1];
+        img.src = 'images/' + filename;
+      }
+      img.alt = img.alt || '';
+      img.loading = 'lazy';
+    });
+
+
+    contentWrap.querySelectorAll('a').forEach(a=>{
+      const href = a.getAttribute('href') || '';
+      if (/^https?:\/\//i.test(href)){
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+
+ 
+      headingsList = Array.from(contentWrap.querySelectorAll('h1,h2')).map(h=>({id:h.id, el:h}));
+
+
+      currentHeadingIndex = headingsList.length ? 0 : -1;
+
+
+      if (btnPrev && btnNext){
+        btnPrev.addEventListener('click', ()=>{
+          if (currentHeadingIndex > 0) {
+            currentHeadingIndex--;
+            const target = headingsList[currentHeadingIndex].el;
+            if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        });
+        btnNext.addEventListener('click', ()=>{
+          if (currentHeadingIndex < headingsList.length - 1){
+            currentHeadingIndex++;
+            const target = headingsList[currentHeadingIndex].el;
+            if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        });
+      }
+
+
+      if (headingsList.length){
+        const obs = new IntersectionObserver((entries)=>{
+          const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top);
+          if (visible.length){
+            const el = visible[0].target;
+            const idx = headingsList.findIndex(h=>h.el === el);
+            if (idx !== -1) currentHeadingIndex = idx;
+          }
+        }, {root: contentWrap, rootMargin: '0px 0px -70% 0px', threshold:[0,0.1]});
+        headingsList.forEach(h=> obs.observe(h.el));
+      }
+
+  }catch(err){
+    console.error(err);
+    contentWrap.innerHTML = '<p style="color:#c0392b">Không thể tải nội dung: '+(err.message||err)+'</p>';
+  }
+}
+
+
+applySettings();
+loadDraft(DRAFT_PATH);
+
+
+function setupSidebarAndTOC(body){
+  const sidebarTitle = document.getElementById('sidebarTitle');
+  const sidebarAuthor = document.getElementById('sidebarAuthor');
+  const sidebarPublisher = document.getElementById('sidebarPublisher');
+  const sidebarDesc = document.getElementById('sidebarDesc');
+  const tocList = document.getElementById('tocList');
+
+  
+  const titleEl = body.querySelector('h1') || body.querySelector('.c68') || body.querySelector('.title');
+  const authorEl = body.querySelector('.c27') || body.querySelector('.author');
+  const publisherEl = body.querySelector('.c27') || body.querySelector('.publisher');
+  const descEl = body.querySelector('p.c3') || body.querySelector('p');
+
+  if (titleEl) sidebarTitle.textContent = titleEl.textContent.trim();
+  if (authorEl) sidebarAuthor.textContent = authorEl.textContent.trim();
+  if (publisherEl) sidebarPublisher.textContent = publisherEl.textContent.trim();
+  if (descEl) sidebarDesc.textContent = descEl.textContent.trim().slice(0,300);
+
+
+  tocList.innerHTML = '';
+  const headings = Array.from(body.querySelectorAll('h1,h2,h3'));
+  headings.forEach((h, i)=>{
+    if (!h.id) h.id = 'hd-' + i + '-' + h.textContent.trim().slice(0,20).replace(/[^a-z0-9]+/ig,'-');
+    const a = document.createElement('a');
+    a.href = '#'+h.id;
+    a.textContent = h.textContent.trim();
+    a.style.display = 'block';
+    a.style.padding = '6px 0';
+    a.style.color = 'rgba(255,255,255,.9)';
+    a.style.textDecoration = 'none';
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const target = document.getElementById(h.id);
+      if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    tocList.appendChild(a);
+  });
+
+
+  const chapterTitle = document.getElementById('chapterTitle');
+  const chapterSub = document.getElementById('chapterSub');
+  const observerOptions = { root: contentWrap, rootMargin: '0px 0px -65% 0px', threshold: [0, 0.1, 0.5] };
+  const obs = new IntersectionObserver((entries)=>{
+    const vis = entries.filter(en=>en.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top);
+    if (vis.length){
+      const h = vis[0].target;
+      chapterTitle.textContent = h.textContent.trim();
+      const nextP = h.nextElementSibling && h.nextElementSibling.tagName.toLowerCase() === 'p' ? h.nextElementSibling.textContent.trim().slice(0,120) : '';
+      chapterSub.textContent = nextP;
+    }
+  }, observerOptions);
+
+
+  Array.from(contentWrap.querySelectorAll('h1,h2')).forEach(h=> obs.observe(h));
+}
+
+
+const originalLoadDraft = loadDraft;
+loadDraft = async function(path){
+  await originalLoadDraft(path);
+  try{
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(contentWrap.innerHTML, 'text/html');
+    setupSidebarAndTOC(doc.body || doc);
+  }catch(e){ console.warn('setupSidebarAndTOC failed', e); }
+};
+
+loadDraft(DRAFT_PATH);
+
+</script>
+</body>
+</html>
