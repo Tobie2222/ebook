@@ -253,29 +253,30 @@ async function loadDraft(path){
       if (btnPrev && btnNext){
         let programmaticTimer = null;
         btnPrev.addEventListener('click', ()=>{
-          if (currentHeadingIndex > 0) {
-            currentHeadingIndex--;
-            const target = headingsList[currentHeadingIndex].el;
-            if (target) {
-              // mark programmatic scrolling to ignore observer updates briefly
-              window.__programmaticScroll = true;
-                scrollToWithOffset(target);
-              clearTimeout(programmaticTimer);
-              programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
-            }
-          }
+          // Scroll up by one viewport amount minus header offset
+          const toolbar = document.querySelector('.toolbar.sticky');
+          const chapterHeader = document.getElementById('chapterHeader');
+          const toolbarH = toolbar ? toolbar.getBoundingClientRect().height : 0;
+          const chapterH = chapterHeader ? chapterHeader.getBoundingClientRect().height : 0;
+          const offset = toolbarH + chapterH + 8;
+          const step = Math.max(160, contentWrap.clientHeight - offset - 40);
+          window.__programmaticScroll = true;
+          contentWrap.scrollBy({ top: -step, behavior: 'smooth' });
+          clearTimeout(programmaticTimer);
+          programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
         });
         btnNext.addEventListener('click', ()=>{
-          if (currentHeadingIndex < headingsList.length - 1){
-            currentHeadingIndex++;
-            const target = headingsList[currentHeadingIndex].el;
-            if (target) {
-              window.__programmaticScroll = true;
-                scrollToWithOffset(target);
-              clearTimeout(programmaticTimer);
-              programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
-            }
-          }
+          // Scroll down by one viewport amount minus header offset
+          const toolbar = document.querySelector('.toolbar.sticky');
+          const chapterHeader = document.getElementById('chapterHeader');
+          const toolbarH = toolbar ? toolbar.getBoundingClientRect().height : 0;
+          const chapterH = chapterHeader ? chapterHeader.getBoundingClientRect().height : 0;
+          const offset = toolbarH + chapterH + 8;
+          const step = Math.max(160, contentWrap.clientHeight - offset - 40);
+          window.__programmaticScroll = true;
+          contentWrap.scrollBy({ top: step, behavior: 'smooth' });
+          clearTimeout(programmaticTimer);
+          programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
         });
       }
 
