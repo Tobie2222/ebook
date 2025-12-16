@@ -160,6 +160,21 @@ function applySettings(){
   contentWrap.style.color = fontColor;
 }
 
+// Scroll helper that accounts for fixed header heights (toolbar + chapter header)
+function scrollToWithOffset(target){
+  if (!target) return;
+  const toolbar = document.querySelector('.toolbar.sticky');
+  const chapterHeader = document.getElementById('chapterHeader');
+  const toolbarRect = toolbar ? toolbar.getBoundingClientRect() : {height:0};
+  const chapterRect = chapterHeader ? chapterHeader.getBoundingClientRect() : {height:0};
+  const offset = toolbarRect.height + chapterRect.height + 8; // add small gap
+
+  const containerTop = contentWrap.getBoundingClientRect().top + contentWrap.scrollTop;
+  const targetY = target.getBoundingClientRect().top + contentWrap.scrollTop - containerTop;
+  const scrollPos = Math.max(0, targetY - offset);
+  contentWrap.scrollTo({ top: scrollPos, behavior: 'smooth' });
+}
+
 
 btnInc.addEventListener('click', ()=>{ fontSize = Math.min(40, fontSize + 1); applySettings(); });
 btnDec.addEventListener('click', ()=>{ fontSize = Math.max(10, fontSize - 1); applySettings(); });
@@ -236,25 +251,42 @@ async function loadDraft(path){
 
 
       if (btnPrev && btnNext){
+        let programmaticTimer = null;
         btnPrev.addEventListener('click', ()=>{
           if (currentHeadingIndex > 0) {
             currentHeadingIndex--;
             const target = headingsList[currentHeadingIndex].el;
-            if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+            if (target) {
+              // mark programmatic scrolling to ignore observer updates briefly
+              window.__programmaticScroll = true;
+                scrollToWithOffset(target);
+              clearTimeout(programmaticTimer);
+              programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
+            }
           }
         });
         btnNext.addEventListener('click', ()=>{
           if (currentHeadingIndex < headingsList.length - 1){
             currentHeadingIndex++;
             const target = headingsList[currentHeadingIndex].el;
-            if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+            if (target) {
+              window.__programmaticScroll = true;
+                scrollToWithOffset(target);
+              clearTimeout(programmaticTimer);
+              programmaticTimer = setTimeout(()=>{ window.__programmaticScroll = false; }, 700);
+            }
           }
         });
       }
 
 
       if (headingsList.length){
+        let lastUpdate = 0;
         const obs = new IntersectionObserver((entries)=>{
+          if (window.__programmaticScroll) return; // ignore during programmatic scroll
+          const now = Date.now();
+          if (now - lastUpdate < 120) return; // throttle frequent updates
+          lastUpdate = now;
           const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top);
           if (visible.length){
             const el = visible[0].target;
@@ -309,7 +341,7 @@ function setupSidebarAndTOC(body){
     a.addEventListener('click', (e)=>{
       e.preventDefault();
       const target = document.getElementById(h.id);
-      if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      if (target) scrollToWithOffset(target);
     });
     tocList.appendChild(a);
   });
